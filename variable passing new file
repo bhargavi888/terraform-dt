@@ -1,0 +1,51 @@
+# first create one var.tf file in this file add 
+
+#touch var.tf
+public_ip = '${package}'
+private_ip = '${package}'
+
+# step2: create main.tf file
+
+provider "aws" {
+    region ="us-west-2"
+    access_key = "AKIAQL6JVCFXOAAOEYVK"
+    secret_key = "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"
+}
+resource "aws_instance" "aws1" {
+    ami = "ami-036d46416a34a611c"
+    instance_type = "t2.micro"
+    key_name = "B"
+    tags = {
+        name = "aws1"
+    }
+}
+data "template_file" "cool_script" {
+  template = "${file("${path.module}/var.sh")/("${path.module}/var2.sh")}"
+
+  vars = {
+  package =  "${aws_instance.aws1.public_ip}"
+  siddu = "${aws_instance.aws1.private_ip}"
+  }
+}
+resource "local_file" "inventory" {
+  content = templatefile("${path.module}/var.sh/${path.module}/var2.sh",
+    {
+     package = aws_instance.aws1.public_ip
+      siddu = aws_instance.aws1.private_ip
+    }
+  )
+  filename = "bhargavi"
+}
+
+
+
+#step3: create output.tf
+
+output "public_ip" {
+    value = aws_instance.aws1.public_ip
+}
+
+output "private_ip" {
+    value = aws_instance.aws1.private_ip
+}
+
