@@ -1,0 +1,62 @@
+# first create a one s3 bucket separately then after create ec2 in one main.tf file and s3staefile.tf in one file 
+
+
+#step1: aws ec2 creation:
+
+
+provider "aws"  {
+  region     = "us-west-2"
+  access_key = "AKIAQL6JVCFXOAAOEYVK"
+  secret_key = "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"
+}
+resource "aws_vpc" "vpc" {
+  cidr_block       = "10.0.0.0/16"
+  instance_tenancy = "default"
+
+  tags = {
+    Name = "demo-vpc"
+  }
+}
+
+resource "aws_instance" "ec2" {
+  ami                    = "ami-036d46416a34a611c"
+  instance_type          = "t2.micro"
+  key_name               = "B"
+  vpc_security_group_ids = ["${aws_security_group.asg.id}"]
+  tags = {
+    Name = "ec21"
+  }
+}
+resource "aws_security_group" "asg" {
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  egress {
+    from_port       = 80
+    to_port         = 80
+    protocol        = "tcp"
+    cidr_blocks     = ["0.0.0.0/0"]
+  }
+ }
+ 
+ 
+ 
+ 
+ 
+ #step2: create s3.tf file:
+ 
+ terraform {
+    backend "s3" {
+        bucket = "my-tests1"
+        key = "terraform.statefile"
+        region = "us-west-2"
+        access_key = "AKIAQL6JVCFXOAAOEYVK"
+        secret_key ="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"
+}
+}
+
+
+
